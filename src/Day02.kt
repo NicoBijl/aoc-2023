@@ -1,7 +1,6 @@
 import java.util.*
 
 fun main() {
-
     fun lineToGame(it: String): Game {
         val index = it.substringBefore(":").replace("Game ", "").trim().toInt()
         val sets = it.substringAfter(":").trim()
@@ -15,7 +14,7 @@ fun main() {
                 }
             }
         return Game(index, sets)
-    }k
+    }
 
     fun part1(maxCubes: Map<Color, Int>, input: List<String>): Int {
         return input.map {
@@ -41,9 +40,7 @@ fun main() {
     val testResult = part1(maxCubes, testInput)
 
     println("Test part 1: $testResult")
-    
     check(testResult == 8)
-
 
     val input = readInput("Day02")
     println("Result part 1: ${part1(maxCubes, input)}")
@@ -57,9 +54,11 @@ fun main() {
 
 data class Game(val index: Int, val sets: List<Map<Color, Int>>) {
     fun isInvalidGame(maxCubes: Map<Color, Int>): Boolean {
-        return sets.any { set -> set.any {(color, amount) ->
-            maxCubes[color]!! < amount
-        }}
+        return sets.any { set ->
+            set.any { (color, amount) ->
+                maxCubes[color]!! < amount
+            }
+        }
     }
 }
 
