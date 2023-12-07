@@ -2,33 +2,33 @@ fun main() {
     val allCards = listOf('A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J').reversed()
 
     data class Hand(val cards: List<Char>, val bid: Int) : Comparable<Hand> {
-        fun getValue(): Int = when {
-            isFiveOfAKind()
-                    || (isFourOfAKind() && cards.count { it == 'J' } == 1)
-                    || (isThreeOfAKind() && cards.count { it == 'J' } == 2)
-                    || (isOnePair() && cards.count { it == 'J' } == 3)
-                    || (cards.count { it == 'J' } == 4)
-            -> 7
+        fun getValue(): Int {
+            val jackCount = cards.count { it == 'J' }
 
-            isFourOfAKind()
-                    || (isThreeOfAKind() && cards.count { it == 'J' } == 1)
-                    || (isTwoPair() && cards.count { it == 'J' } == 2)
-                    || (cards.count { it == 'J' } == 3)
-            -> 6
+            return when {
+                isFiveOfAKind()
+                        || (isFourOfAKind() && jackCount == 1)
+                        || (isThreeOfAKind() && jackCount == 2)
+                        || (isOnePair() && jackCount == 3)
+                        || jackCount == 4 -> 7
 
-            isFullHouse()
-                    || (isTwoPair() && cards.count { it == 'J' } == 1)
-            -> 5
+                isFourOfAKind()
+                        || (isThreeOfAKind() && jackCount == 1)
+                        || (isTwoPair() && jackCount == 2)
+                        || jackCount == 3 -> 6
 
-            isThreeOfAKind()
-                    || (isOnePair() && cards.count { it == 'J' } == 1)
-                    || (cards.count { it == 'J' } == 2)
-            -> 4
+                isFullHouse()
+                        || (isTwoPair() && jackCount == 1) -> 5
 
-            isTwoPair() -> 3
-            isOnePair() || cards.count { it == 'J' } == 1 -> 2
-            isHighCard() -> 1
-            else -> 0
+                isThreeOfAKind()
+                        || (isOnePair() && jackCount == 1)
+                        || jackCount == 2 -> 4
+
+                isTwoPair() -> 3
+                isOnePair() || jackCount == 1 -> 2
+                isHighCard() -> 1
+                else -> 0
+            }
         }
 
         override fun compareTo(other: Hand): Int {
