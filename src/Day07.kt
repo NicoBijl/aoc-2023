@@ -1,14 +1,32 @@
 fun main() {
-    val allCards = listOf('A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2').reversed()
+    val allCards = listOf('A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J').reversed()
 
     data class Hand(val cards: List<Char>, val bid: Int) : Comparable<Hand> {
         fun getValue(): Int = when {
-            isFiveOfAKind() -> 7
-            isFourOfAKind() -> 6
-            isFullHouse() -> 5
-            isThreeOfAKind() -> 4
+            isFiveOfAKind()
+                    || (isFourOfAKind() && cards.count { it == 'J' } == 1)
+                    || (isThreeOfAKind() && cards.count { it == 'J' } == 2)
+                    || (isOnePair() && cards.count { it == 'J' } == 3)
+                    || (cards.count { it == 'J' } == 4)
+            -> 7
+
+            isFourOfAKind()
+                    || (isThreeOfAKind() && cards.count { it == 'J' } == 1)
+                    || (isTwoPair() && cards.count { it == 'J' } == 2)
+                    || (cards.count { it == 'J' } == 3)
+            -> 6
+
+            isFullHouse()
+                    || (isTwoPair() && cards.count { it == 'J' } == 1)
+            -> 5
+
+            isThreeOfAKind()
+                    || (isOnePair() && cards.count { it == 'J' } == 1)
+                    || (cards.count { it == 'J' } == 2)
+            -> 4
+
             isTwoPair() -> 3
-            isOnePair() -> 2
+            isOnePair() || cards.count { it == 'J' } == 1 -> 2
             isHighCard() -> 1
             else -> 0
         }
@@ -36,7 +54,9 @@ fun main() {
 
         fun isFiveOfAKind(): Boolean = cards.distinct().size == 1
 
+
         fun isFourOfAKind(): Boolean = cards.groupingBy { it }.eachCount().values.any { it == 4 }
+
 
         fun isFullHouse(): Boolean {
             val groups = cards.groupingBy { it }.eachCount().values.sorted()
@@ -44,6 +64,7 @@ fun main() {
         }
 
         fun isThreeOfAKind(): Boolean = cards.groupingBy { it }.eachCount().values.any { it == 3 }
+
 
         fun isTwoPair(): Boolean {
             val groups = cards.groupingBy { it }.eachCount().values.sorted()
@@ -75,21 +96,17 @@ fun main() {
         return totalWinnings
     }
 
-    fun part2(lines: List<String>): Int {
-        return 0
-    }
-
     val testInput = readInput("Day07_sample")
-    val sampleResult = part1(testInput)
-
-    println("Test part 1: $sampleResult")
-    check(sampleResult == 6440L)
-
     val input = readInput("Day07")
-    println("Result part 1: ${part1(input)}")
 
-//    val testResult2 = part2(testInput)
-//    println("Test part 2: $testResult2")
-//    check(testResult2 == 71503)
-//    println("Result part 2: ${part2(input)}")
+//    val sampleResult = part1(testInput)
+//    println("Test part 1: $sampleResult")
+//    check(sampleResult == 6440L)
+//    println("Result part 1: ${part1(input)}")
+
+    // Part 2, updated getValue
+    val testResult2 = part1(testInput)
+    println("Test part 2: $testResult2")
+    check(testResult2 == 5905L)
+    println("Result part 2: ${part1(input)}")
 }
