@@ -32,7 +32,7 @@ fun main() {
             a to Pair(b, c)
         }
         val translationKey = directions.keys
-        val translationValue = directions.values.map { translationKey.indexOf(it.first) to translationKey.indexOf(it.second) }
+        val translationValue = directions.values.map { translationKey.indexOf(it.first) to translationKey.indexOf(it.second) }.toTypedArray()
         val destinationIndexes = translationKey.filter { it.last() == 'Z' }.map { translationKey.indexOf(it) }
         val current = translationKey.filter { it.last() == 'A' }.map { translationKey.indexOf(it) }.toMutableList()
         var i = 0
@@ -42,7 +42,7 @@ fun main() {
         while (destinationIndexes.any { !current.contains(it) }) {
             val currentInstructionIsLeft = instructionIsLeft[i]
             current.replaceAll {
-                val direction = translationValue.elementAt(it)
+                val direction = translationValue[it]
                 if (currentInstructionIsLeft) direction.first else direction.second
             }
 
