@@ -31,21 +31,30 @@ fun main() {
             val (_, a, b, c) = pattern.matchEntire(it.trim())?.groupValues!!
             a to Pair(b, c)
         }
-        val current = directions.filterKeys { it.last() == 'A' }.keys.toMutableList()
+        val translationKey = directions.keys
+        val translationValue = directions.values.map { translationKey.indexOf(it.first) to translationKey.indexOf(it.second) }
+        val destinationIndexes = translationKey.filter { it.last() == 'Z' }.map { translationKey.indexOf(it) }
+        val current = translationKey.filter { it.last() == 'A' }.map { translationKey.indexOf(it) }.toMutableList()
         var i = 0
         var steps = 0L
         logger.info("calculating for ${current.count()}")
-        while (current.any { it.last() != 'Z' }) {
+        var startTime = System.currentTimeMillis()
+        while (!current.containsAll(destinationIndexes)) {
             val currentInstruction = instructions[i]
             current.replaceAll {
-                val direction = directions[it]!!
+                val direction = translationValue.elementAt(it)
                 if (currentInstruction == 'L') direction.first else direction.second
             }
 
             i = (i + 1) % instructions.size
             steps += 1
-            if ((steps % 1_000_000_000).toInt() == 0) logger.info("Progress $steps")
+            if ((steps % 1_000_000_000).toInt() == 0) {
+                val endTime = System.currentTimeMillis()
+                logger.info("Progress $steps time: ${(endTime - startTime) / 1000} seconds")
+                startTime = System.currentTimeMillis()
+            }
         }
+        logger.info("Finished after $steps steps")
 
         return steps
     }
