@@ -25,7 +25,7 @@ fun main() {
     }
 
     fun part2(fileContent: String): Long {
-        val instructions = fileContent.split("\n\n").first().toCharArray()
+        val instructionIsLeft = fileContent.split("\n\n").first().map { it == 'L' }.toTypedArray()
         val pattern = Regex("^(.+) = \\((.+), (.+)\\)$")
         val directions = fileContent.split("\n\n")[1].split("\n").associateTo(HashMap()) {
             val (_, a, b, c) = pattern.matchEntire(it.trim())?.groupValues!!
@@ -39,14 +39,14 @@ fun main() {
         var steps = 0L
         logger.info("calculating for ${current.count()}")
         var startTime = System.currentTimeMillis()
-        while (!current.containsAll(destinationIndexes)) {
-            val currentInstruction = instructions[i]
+        while (destinationIndexes.any { !current.contains(it) }) {
+            val currentInstructionIsLeft = instructionIsLeft[i]
             current.replaceAll {
                 val direction = translationValue.elementAt(it)
-                if (currentInstruction == 'L') direction.first else direction.second
+                if (currentInstructionIsLeft) direction.first else direction.second
             }
 
-            i = (i + 1) % instructions.size
+            i = (i + 1) % instructionIsLeft.size
             steps += 1
             if ((steps % 1_000_000_000).toInt() == 0) {
                 val endTime = System.currentTimeMillis()
