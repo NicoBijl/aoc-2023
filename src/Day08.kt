@@ -1,62 +1,53 @@
 import java.util.logging.Logger
 
+
+fun gcd(a: Long, b: Long): Long = if (b == 0L) a else gcd(b, a % b)
+fun lcm(a: Long, b: Long): Long = (a * b) / gcd(a, b)
+fun LongArray.lcm() = this.reduce { acc, n -> lcm(acc, n) }
+
 fun main() {
     val logger = Logger.getLogger("")
-    fun part1(fileContent: String): Long {
-
-        val instructions = fileContent.split("\n\n").first()
+    fun parse(fileContent: String): Pair<Array<Boolean>, Map<String, Pair<String, String>>> {
+        val instructionIsLeft = fileContent.split("\n\n").first().map { it == 'L' }.toTypedArray()
         val pattern = Regex("^(.+) = \\((.+), (.+)\\)$")
         val directions = fileContent.split("\n\n")[1].split("\n").associate {
-            val (_, a, b, c) = pattern.matchEntire(it.trim())?.groupValues!!
-            a to Pair(b, c)
+            val (_, from, left, right) = pattern.matchEntire(it.trim())?.groupValues!!
+            from to Pair(left, right)
         }
+        return Pair(instructionIsLeft, directions)
+    }
+
+    fun part1(fileContent: String): Long {
+        val (instructionIsLeft, directions) = parse(fileContent)
         var current = "AAA"
-        var i = 0
-        var steps = 0L
+        var steps = 0
         while (current != "ZZZ") {
-            val currentInstruction = instructions[i]
             val direction = directions[current]!!
-            current = if (currentInstruction == 'L') direction.first else direction.second
-            i = (i + 1) % instructions.length
+            current = if (instructionIsLeft[steps % instructionIsLeft.size]) direction.first else direction.second
             steps += 1
         }
 
-        return steps
+        return steps.toLong()
     }
 
     fun part2(fileContent: String): Long {
-        val instructionIsLeft = fileContent.split("\n\n").first().map { it == 'L' }.toTypedArray()
-        val pattern = Regex("^(.+) = \\((.+), (.+)\\)$")
-        val directions = fileContent.split("\n\n")[1].split("\n").associateTo(HashMap()) {
-            val (_, a, b, c) = pattern.matchEntire(it.trim())?.groupValues!!
-            a to Pair(b, c)
-        }
-        val translationKey = directions.keys
-        val translationValue = directions.values.map { translationKey.indexOf(it.first) to translationKey.indexOf(it.second) }.toTypedArray()
-        val destinationIndexes = translationKey.filter { it.last() == 'Z' }.map { translationKey.indexOf(it) }.toTypedArray()
-        val current = translationKey.filter { it.last() == 'A' }.map { translationKey.indexOf(it) }.toMutableList()
-        var i = 0
-        var steps = 0L
-        logger.info("calculating for ${current.count()}")
-        var startTime = System.currentTimeMillis()
-        while (destinationIndexes.any { !current.contains(it) }) {
-            val currentInstructionIsLeft = instructionIsLeft[i]
-            current.replaceAll {
-                val direction = translationValue[it]
-                if (currentInstructionIsLeft) direction.first else direction.second
+        val (instructionIsLeft, directions) = parse(fileContent)
+        var steps = 0
+        var current = directions.keys.filter { it.last() == 'A' }
+        val minimumSearches = LongArray(current.size) { -1 }
+        while (minimumSearches.any { it < 0 }) {
+            current = when (instructionIsLeft[steps % instructionIsLeft.size]) {
+                true -> current.map { directions[it]?.first ?: "" }
+                else -> current.map { directions[it]?.second ?: "" }
             }
-
-            i = (i + 1) % instructionIsLeft.size
-            steps += 1
-            if ((steps % 1_000_000_000).toInt() == 0) {
-                val endTime = System.currentTimeMillis()
-                logger.info("Progress $steps time: ${(endTime - startTime) / 1000} seconds")
-                startTime = System.currentTimeMillis()
+            steps++
+            current.forEachIndexed { index, node ->
+                if (node.last() == 'Z' && minimumSearches[index] < 0) {
+                    minimumSearches[index] = steps.toLong()
+                }
             }
         }
-        logger.info("Finished after $steps steps")
-
-        return steps
+        return minimumSearches.lcm()
     }
 
     val testInput = readText("Day08_sample")
@@ -73,4 +64,5 @@ fun main() {
     check(testResult2 == 6L)
     println("Result part 2: ${part2(input)}")
 }
+
 
