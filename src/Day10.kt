@@ -55,11 +55,26 @@ fun main() {
         return distanceFromStart.values.max()
     }
 
-    fun part2(fileContent: List<String>): Long {
-        return 0L
+    fun part2(fileContent: List<String>): Int {
+        val map = parse(fileContent)
+        val startingPosition: Position? = getStartingPosition(map)
+        val distanceFromStart: MutableMap<Position, Int> = calculateDistanceFromStart(startingPosition, map)
+        val loop = distanceFromStart.keys.map { Pair(it.row, it.column) }.toTypedArray()
+
+        val result = map.allPositions()
+            .filter { position: Position ->
+                distanceFromStart.none { it.key.row == position.row && it.key.column == position.column }
+            }.filter {
+                val lineCrossings = map.getLineCrossings(it, loop)
+                lineCrossings % 2 == 1// only items in the loop
+            }
+
+        return result.size
     }
 
     val testInput = readInput("Day10_sample")
+    val testInput2 = readInput("Day10_sample2")
+    val testInput3 = readInput("Day10_sample3")
     val input = readInput("Day10")
 
     val sampleResult = part1(testInput)
@@ -68,17 +83,46 @@ fun main() {
     println("Result part 1: ${part1(input)}")
 
     // Part 2, updated getValue
-//    val testResult2 = part2(testInput)
-//    println("Test part 2: $testResult2")
-//    check(testResult2 == 2L)
-//    println("Result part 2: ${part2(input)}")
+    val testResult2 = part2(testInput2)
+    println("Test part 2: $testResult2")
+    val testResult3 = part2(testInput3)
+    println("Test part 3: $testResult3")
+    check(testResult2 == 8)
+    check(testResult3 == 10)
+    println("Result part 2: ${part2(input)}")
 }
 
-private fun Array<CharArray>.isConnectedToStartingPoint(startingPosition: Position, surroundingPosition: Position): Boolean {
-    when (this[startingPosition.row][startingPosition.column]) {
+private fun Array<CharArray>.getHeight(): Int = this.size
+private fun Array<CharArray>.getWidth(): Int = this.first().size
 
+private fun Array<CharArray>.getLineCrossings(position: Position, loop: Array<Pair<Int, Int>>): Int {
+    val before = this[position.row].take(position.column)
+    val direct = before
+        .filterIndexed { columnIndex, c ->
+            loop.contains(Pair(position.row, columnIndex)) // if part of loop
+        }.count { it == '|' }
+    val indirect = before
+        .filterIndexed { columnIndex, c ->
+            loop.contains(Pair(position.row, columnIndex)) // if part of loop
+        }
+        .joinToString("")
+        .run {
+            val matches = Regex("F-*J").findAll(this).count() + Regex("L-*7").findAll(this).count()
+            matches
+        }
+    return direct + indirect
+}
+
+private fun Array<CharArray>.allPositions(): List<Position> {
+    return this.flatMapIndexed { rowIndex: Int, row: CharArray ->
+        row.mapIndexed { columnIndex, cell ->
+            Position(rowIndex, columnIndex, null, null)
+        }
     }
-    return false
+}
+
+private fun Array<CharArray>.getChar(row: Int, column: Int): Char? {
+    return this.getOrNull(row)?.getOrNull(column)
 }
 
 private fun Array<CharArray>.getChar(position: Position): Char? {
