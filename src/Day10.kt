@@ -61,7 +61,7 @@ fun main() {
         val distanceFromStart: MutableMap<Position, Int> = calculateDistanceFromStart(startingPosition, map)
         val loop = distanceFromStart.keys.map { Pair(it.row, it.column) }.toTypedArray()
 
-        val result = map.allPositions()
+        val itemsInsideLoop = map.allPositions()
             .filter { position: Position ->
                 distanceFromStart.none { it.key.row == position.row && it.key.column == position.column }
             }.filter {
@@ -69,7 +69,7 @@ fun main() {
                 lineCrossings % 2 == 1// only items in the loop
             }
 
-        return result.size
+        return itemsInsideLoop.size
     }
 
     val testInput = readInput("Day10_sample")
@@ -91,9 +91,6 @@ fun main() {
     check(testResult3 == 10)
     println("Result part 2: ${part2(input)}")
 }
-
-private fun Array<CharArray>.getHeight(): Int = this.size
-private fun Array<CharArray>.getWidth(): Int = this.first().size
 
 private fun Array<CharArray>.getLineCrossings(position: Position, loop: Array<Pair<Int, Int>>): Int {
     val before = this[position.row].take(position.column)
@@ -133,71 +130,77 @@ private fun Array<CharArray>.getChar(position: Position): Char? {
 private fun Array<CharArray>.findAdjacent(currentPosition: Position, distanceFromStart: MutableMap<Position, Int>): List<Position> {
     val currentPipe = this.getChar(currentPosition)
     if (currentPipe == 'S') {
-        // check all directions
-        val result = mutableListOf<Position>()
-        if (listOf('|', '7', 'F').any { it == this.getChar(currentPosition.up()) }) {
-            result.add(currentPosition.up())
-        }
-        if (listOf('|', 'L', 'J').any { it == this.getChar(currentPosition.down()) }) {
-            result.add(currentPosition.down())
-        }
-        if (listOf('-', 'F', 'L').any { it == this.getChar(currentPosition.left()) }) {
-            result.add(currentPosition.left())
-        }
-        if (listOf('-', '7', 'J').any { it == this.getChar(currentPosition.right()) }) {
-            result.add(currentPosition.right())
-        }
-        check(result.size == 2)
-        return result
+        return getAdjacentForStartingPoint(currentPosition)
     } else {
-        val adjacentPipe = when (currentPipe) {
-            '|' -> if (currentPosition.row > currentPosition.previous!!.row) {
-                currentPosition.down()
-            } else {
-                currentPosition.up()
-            }
-
-            '-' -> if (currentPosition.column > currentPosition.previous!!.column) {
-                currentPosition.right()
-            } else {
-                currentPosition.left()
-            }
-
-            'L' -> if (currentPosition.column == currentPosition.previous!!.column) {
-                currentPosition.right()
-            } else {
-                currentPosition.up()
-            }
-
-            'J' -> if (currentPosition.column == currentPosition.previous!!.column) {
-                currentPosition.left()
-            } else {
-                currentPosition.up()
-            }
-
-            '7' -> if (currentPosition.column == currentPosition.previous!!.column) {
-                currentPosition.left()
-            } else {
-                currentPosition.down()
-            }
-
-            'F' -> if (currentPosition.column == currentPosition.previous!!.column) {
-                currentPosition.right()
-            } else {
-                currentPosition.down()
-            }
-
-            else -> {
-                throw Error("unsupported! $currentPipe on position $currentPosition")
-            }
-        }
+        val adjacentPipe = getAdjacentPipe(currentPipe, currentPosition)
         return if (distanceFromStart.any { it.key.row == adjacentPipe.row && it.key.column == adjacentPipe.column }) {
             emptyList()
         } else {
             listOf(adjacentPipe)
         }
-
     }
+}
 
+private fun getAdjacentPipe(currentPipe: Char?, currentPosition: Position): Position {
+    val adjacentPipe = when (currentPipe) {
+        '|' -> if (currentPosition.row > currentPosition.previous!!.row) {
+            currentPosition.down()
+        } else {
+            currentPosition.up()
+        }
 
+        '-' -> if (currentPosition.column > currentPosition.previous!!.column) {
+            currentPosition.right()
+        } else {
+            currentPosition.left()
+        }
+
+        'L' -> if (currentPosition.column == currentPosition.previous!!.column) {
+            currentPosition.right()
+        } else {
+            currentPosition.up()
+        }
+
+        'J' -> if (currentPosition.column == currentPosition.previous!!.column) {
+            currentPosition.left()
+        } else {
+            currentPosition.up()
+        }
+
+        '7' -> if (currentPosition.column == currentPosition.previous!!.column) {
+            currentPosition.left()
+        } else {
+            currentPosition.down()
+        }
+
+        'F' -> if (currentPosition.column == currentPosition.previous!!.column) {
+            currentPosition.right()
+        } else {
+            currentPosition.down()
+        }
+
+        else -> {
+            throw Error("unsupported! $currentPipe on position $currentPosition")
+        }
+    }
+    return adjacentPipe
+}
+
+private fun Array<CharArray>.getAdjacentForStartingPoint(currentPosition: Position): MutableList<Position> {
+    // check all directions
+    val result = mutableListOf<Position>()
+    if (listOf('|', '7', 'F').any { it == this.getChar(currentPosition.up()) }) {
+        result.add(currentPosition.up())
+    }
+    if (listOf('|', 'L', 'J').any { it == this.getChar(currentPosition.down()) }) {
+        result.add(currentPosition.down())
+    }
+    if (listOf('-', 'F', 'L').any { it == this.getChar(currentPosition.left()) }) {
+        result.add(currentPosition.left())
+    }
+    if (listOf('-', '7', 'J').any { it == this.getChar(currentPosition.right()) }) {
+        result.add(currentPosition.right())
+    }
+    check(result.size == 2)
+    return result
 }
