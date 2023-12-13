@@ -4,11 +4,26 @@ import kotlin.math.min
 fun main() {
     val logger = Logger.getLogger("")
 
+    fun countDifferences(str1: String, str2: String): Int {
+        var count = 0
+        val maxLength = maxOf(str1.length, str2.length)
+
+        for (i in 0 until maxLength) {
+            val char1 = str1.getOrNull(i)
+            val char2 = str2.getOrNull(i)
+
+            if (char1 != char2) {
+                count++
+            }
+        }
+
+        return count
+    }
+
     fun getRowCount(group: List<String>, groupIndex: Int, rowIndices: IntRange): Int {
         var rowCount = 0
         group.forEachIndexed { rowIndex, row ->
-
-            println("Group $groupIndex - Row $rowIndex")
+//            println("Group $groupIndex - Row $rowIndex")
             if (rowIndex == rowIndices.last) {
                 println("no point in checking the last row")
                 return@forEachIndexed
@@ -19,12 +34,18 @@ fun main() {
             if (maxRow > 0) {
                 val linesBefore = before.reversed().take(maxRow).map { group.elementAt(it) }
 //                println("linesBefore $linesBefore")
-                val linesAfter = after.take(maxRow).also { println("after $it") }.map { group.elementAt(it) }
+                val linesAfter = after.take(maxRow).map { group.elementAt(it) }
 //                println("linesAfter $linesAfter")
 //                println("group $groupIndex $group, row : $rowIndex maxRow to compare= $maxRow")
-                if (linesBefore == linesAfter && rowCount < after.first) {
+
+                var differences = 0
+                for (index in linesBefore.indices) {
+                    differences += countDifferences(linesAfter[index], linesBefore[index])
+                }
+
+                if (differences == 1 && rowCount < after.first) {
                     println("group $groupIndex - Found a group of $maxRow, $linesBefore vs $linesAfter")
-                    rowCount = after.first// add one because we need the amount left of the
+                    rowCount = after.first
                 }
             } else {
                 println("maxRow $maxRow")
@@ -79,7 +100,7 @@ fun main() {
 
     val sampleResult = part1(testInput)
     println("Test part 1: $sampleResult")
-    check(sampleResult == 405)
+    check(sampleResult == 400)
     println("Result part 1: ${part1(input)}") // 18138 is to low, 26317 is to low
 
 // Part 2, updated getValue
