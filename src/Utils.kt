@@ -22,3 +22,20 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
  * The cleaner shorthand for printing output.
  */
 fun Any?.println() = println(this)
+
+fun rotateGrid90Degrees(grid: List<String>): List<String> {
+    val numRows = grid.size
+    val numCols = grid[0].length
+    val newGrid = MutableList(numCols) { StringBuilder() }
+
+    for (col in 0 until numCols) {
+        for (row in numRows - 1 downTo 0) {
+            newGrid[col].append(grid[row][col])
+        }
+    }
+
+    return newGrid.map { it.toString() }.also {
+        println("rotated: ")
+        it.onEach { println(it) }
+    }
+}

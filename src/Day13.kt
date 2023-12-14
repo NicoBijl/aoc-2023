@@ -54,23 +54,6 @@ fun main() {
         return rowCount
     }
 
-    fun rotateGrid90Degrees(grid: List<String>): List<String> {
-        val numRows = grid.size
-        val numCols = grid[0].length
-        val newGrid = MutableList(numCols) { StringBuilder() }
-
-        for (col in 0 until numCols) {
-            for (row in numRows - 1 downTo 0) {
-                newGrid[col].append(grid[row][col])
-            }
-        }
-
-        return newGrid.map { it.toString() }.also {
-            println("rotated: ")
-            it.onEach { println(it) }
-        }
-    }
-
 
     fun part1(fileContent: String): Int {
         val groups = fileContent.split("\n\n").map { it.split('\n') }
