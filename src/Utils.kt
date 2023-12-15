@@ -8,7 +8,7 @@ import kotlin.io.path.readText
  * Reads lines from the given input txt file.
  */
 fun readInput(name: String) = Path("src/$name.txt").readLines()
-fun readArrays(name: String) = Path("src/$name.txt").readLines().map { it.toCharArray()}.toTypedArray()
+fun readArrays(name: String) = Path("src/$name.txt").readLines().map { it.toCharArray() }.toTypedArray()
 fun readText(name: String) = Path("src/$name.txt").readText()
 
 /**
@@ -38,4 +38,17 @@ fun rotateGrid90Degrees(grid: List<String>): List<String> {
         println("rotated: ")
         it.onEach { println(it) }
     }
+}
+
+fun rotateGrid90Degrees(matrix: Array<CharArray>): Array<CharArray> {
+    val n = matrix.size
+    val rotated = Array(n) { CharArray(n) }
+
+    for (i in 0 until n) {
+        for (j in 0 until n) {
+            rotated[j][n - 1 - i] = matrix[i][j]
+        }
+    }
+
+    return rotated
 }
