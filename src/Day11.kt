@@ -6,28 +6,28 @@ fun main() {
 
 
     fun part1(fileContent: Array<CharArray>): Long {
-        val world = World(fileContent.map { it.map { it.toString() }.toMutableList() }.toMutableList())
-        world.expand()
-        world.replaceHashSymbol()
-        val galaxies = world.getGalaxies()
+        val stage = Stage(fileContent.map { it.map { it.toString() }.toMutableList() }.toMutableList())
+        stage.expand()
+        stage.replaceHashSymbol()
+        val galaxies = stage.getGalaxies()
         val distance = mutableListOf<Distance>()
         galaxies.forEach { (idFrom: Int, from: Vec2) ->
             galaxies.filter { it.key != idFrom }.map { (idTo, to): Map.Entry<Int, Vec2> ->
-                distance.add(Distance("$idFrom/$idTo", from, to, world.calculateDistance(from, to, 1)))
+                distance.add(Distance("$idFrom/$idTo", from, to, stage.calculateDistance(from, to, 1)))
             }
         }
         return distance.sumOf { it.distance } / 2 //distance contains both directions.
     }
 
     fun part2(fileContent: Array<CharArray>, multiplier: Int): Long {
-        val world = World(fileContent.map { it.map { it.toString() }.toMutableList() }.toMutableList())
-        world.replaceHashSymbol()
-        world.expand2()
-        val galaxies = world.getGalaxies()
+        val stage = Stage(fileContent.map { it.map { it.toString() }.toMutableList() }.toMutableList())
+        stage.replaceHashSymbol()
+        stage.expand2()
+        val galaxies = stage.getGalaxies()
         val distance = mutableListOf<Distance>()
         galaxies.forEach { (idFrom: Int, from: Vec2) ->
             galaxies.filter { it.key != idFrom }.map { (idTo, to): Map.Entry<Int, Vec2> ->
-                distance.add(Distance("$idFrom/$idTo", from, to, world.calculateDistance(from, to, multiplier)))
+                distance.add(Distance("$idFrom/$idTo", from, to, stage.calculateDistance(from, to, multiplier)))
             }
         }
         return distance.sumOf { it.distance } / 2 //distance contains both directions.
@@ -51,7 +51,7 @@ fun main() {
     println("Result part 2: ${part2(input, 1000000)}")
 }
 
-data class World(var grid: MutableList<MutableList<String>>) {
+data class Stage(var grid: MutableList<MutableList<String>>) {
     fun replaceHashSymbol() {
         var locationNumber = 1
         for (rowIndex in grid.indices) {
